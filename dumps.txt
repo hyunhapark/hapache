@@ -1,0 +1,41 @@
+GET /ICE2015F15/Assignments HTTP/1.1
+Host: csl.skku.edu
+Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36
+Referer: http://csl.skku.edu/ICE2015F15/Overview
+Accept-Encoding: gzip, deflate, sdch
+Accept-Language: ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4
+Cookie: __utma=70709266.1340347791.1393932675.1395294128.1395636101.3; __gads=ID=9135b85b1ab4f071:T=1438243104:S=ALNI_MZ02hbNEMVgkE0gCYyMfpJQyLaeCQ; _ga=GA1.2.1340347791.1393932675
+
+
+HTTP/1.1 200 OK
+Date: Mon, 07 Dec 2015 12:51:33 GMT
+Server: Apache/2.2.22 (Debian)
+Cache-Control: no-store, no-cache, must-revalidate
+Vary: Accept-Encoding
+Content-Encoding: gzip
+Content-Length: 4931
+Keep-Alive: timeout=5, max=100
+Connection: Keep-Alive
+Content-Type: text/html; charset=UTF-8
+
+
+
+GET / HTTP/1.1
+Host: www.naver.com
+Connection: keep-alive
+
+HTTP/1.1 200 OK
+Server: nginx
+Date: Mon, 07 Dec 2015 12:58:26 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: close
+Cache-Control: no-cache, no-store, must-revalidate
+Pragma: no-cache
+P3P: CP="CAO DSP CURa ADMa TAIa PSAa OUR LAW STP PHY ONL UNI PUR FIN COM NAV INT DEM STA PRE"
+X-Frame-Options: SAMEORIGIN
