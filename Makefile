@@ -1,6 +1,6 @@
 all:
-	gcc -o hapache hapache.c http.c list.c mime.c
+	gcc -o hapache hapache.c http.c list.c mime.c -g -Wall -Wextra -Wno-unused
 tags:
 	ctags `find . -name '*.[ch]'`
 clean:
-	rm -f hsh tags
+	rm -f hapache tags

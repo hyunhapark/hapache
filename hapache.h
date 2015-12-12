@@ -6,6 +6,7 @@
 #include "list.h"
 #include <sys/socket.h>
 
+#define SERVER_NAME "Hapache/0.0.1"
 #define PORT        12345
 #define WEBROOT_DIR "/var/www"
 #define PIDLOG_PATH "/tmp/hapache.pid"

@@ -19,8 +19,31 @@ struct list cbuf_list; // TODO : use hash queue instead of list
 
 void
 server_init () {
+	int tmpfd;
+	if ( (tmpfd = open(PIDLOG_PATH, O_CREAT | O_TRUNC | O_WRONLY,
+			00644)) == -1 ) {
+		perror("open");
+		fprintf(stderr, "Failed to log pid into %s.\n", PIDLOG_PATH);
+		exit(1);
+	}
+	pid_t pid = getpid();
+	char spid[32];
+	sprintf(spid, "%d", (int) pid);
+	write(tmpfd, spid, strlen(spid));
+	close(tmpfd);
+
 	webroot = WEBROOT_DIR;
-	chroot (webroot);
+	if (chdir (webroot)<0) {
+		perror("chdir");
+		fprintf(stderr, "Failed to chdir to webroot directory %s\n",WEBROOT_DIR);
+		exit(1);
+	}
+	if (chroot (webroot)<0) {
+		perror("chroot");
+		fprintf(stderr, "Failed to chroot to webroot directory %s\n",WEBROOT_DIR);
+		fprintf(stderr, "Try with sudo again.\n");
+		exit(1);
+	}
 	listen_addr.sin_family = AF_INET;
 	listen_addr.sin_addr.s_addr = INADDR_ANY;
 	listen_addr.sin_port = htons(PORT);
@@ -61,7 +84,7 @@ server_check_clients (int listenfd, struct pool *p) {
 					}
 				} else {
 					struct http_request *req;
-					http_get_request (cbuf, req);
+					http_get_request (cbuf, &req);
 					http_send_response (cbuf, req);
 					/* TODO : chage this send asyncronous.
 					   http_send_response_async (cbuf, req); */
@@ -95,38 +118,28 @@ server_check_clients (int listenfd, struct pool *p) {
 
 int
 server_start () {
-	int listenfd=0, connfd=0, tmpfd=0, val=0;
+	int listenfd=0, connfd=0, val=0;
 	int yes=1;
 	struct pool p;
 
-	if ( (tmpfd = open(PIDLOG_PATH, O_CREAT | O_TRUNC | O_RDWR,
-			00644)) == -1 ) {
-		fprintf(stderr, "Failed to log pid.\n");
-		exit(1);
-	}
-	pid_t pid = getpid();
-	char spid[32];
-	sprintf(spid, "%d", (int) pid);
-	write(tmpfd, spid, strlen(spid));
-
 	if ( (listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1 ) {
-		perror("Failed creating socket.");
+		perror("socket");
 		exit(1);
 	}
 
 	if ( setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &yes,
 			sizeof(int)) == -1 ) {
-		perror("Reusing address failed.");
+		perror("setsockopt");
 		exit(1);
 	}
 
 	if ( bind(listenfd, (struct sockaddr *) &listen_addr, sizeof(listen_addr)) == -1 ) {
-		perror("Bind failed.");
+		perror("bind");
 		exit(1);
 	}
 
 	if ( listen(listenfd, BACKLOG_CNT) == -1 ) {
-		perror("Listen failed.");
+		perror("listen");
 		exit(1);
 	}
 
@@ -138,7 +151,7 @@ server_start () {
 		p.ready_set = p.master_set;
 		p.nready = select (p.maxfd+1, &p.ready_set, NULL, NULL, NULL);
 		if (FD_ISSET(listenfd, &p.ready_set)) {
-			int caddrlen=0;
+			socklen_t caddrlen=0;
 			struct sockaddr_in caddr;
 			connfd = accept (listenfd, (struct sockaddr *)&caddr,
 					&caddrlen);

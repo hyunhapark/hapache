@@ -50,7 +50,8 @@ struct http_response {
 	
 };
 
-void http_get_request (struct cbuf *, struct http_request *);
+void http_get_request (struct cbuf *, struct http_request **);
 void http_send_response (struct cbuf *, struct http_request *);
+int http_check_end(int, char *);
 
 #endif
