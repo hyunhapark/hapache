@@ -95,12 +95,10 @@ server_check_clients (int listenfd, struct pool *p) {
 					}
 				}
 			} else if (n < 0) { /* Unexpected close?? or some other things? */
-				fprintf(stderr,"DEBUG L%d\n", __LINE__); fflush(stderr); //XXX
 				/* TODO : free buffer and close? socket. */
 				/* TODO : check errorno */
 			} else { /* EOF (n==0) */
 				/* Free buffer (if exists) and close socket. */
-				fprintf(stderr,"DEBUG L%d\n", __LINE__); fflush(stderr); //XXX
 				if (cbuf!=NULL) {
 					list_remove (&cbuf->elem);
 					free (cbuf);

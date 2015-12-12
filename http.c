@@ -91,25 +91,61 @@ http_send_response (struct cbuf *cbuf, struct http_request *req) {
 				strcpy (ext, old_p);
 			}
 		}
-		const char *mime = get_mime_from_ext(ext);
-		char *ctype = strcat (strcpy (malloc(128), "Content-Type: "), mime);
+		if (!strcmp (ext, "php")) {
+			strcats (res, "HTTP/1.1 200 OK", cnt);
+			strcats (res, "Server: Hapache/0.0.1", cnt);
+			strcats (res, "Connection: close", cnt); /* Force close. */
+			strcats (res, "Content-Type: text/html", cnt); //FIXME
+			strcat (res, "Content-Length: "); cnt += strlen("Content-Length: ");
 
-		// TODO handle error.
-		strcats (res, "HTTP/1.1 200 OK", cnt); //FIXME
-		strcats (res, "Server: Hapache/0.0.1", cnt);
-		strcats (res, "Connection: close", cnt); /* Force close. */
-		strcats (res, ctype, cnt); //FIXME
-		free (ctype);
-		strcat (res, "Content-Length: "); cnt += strlen("Content-Length: ");
-		char tmp[512]={0};
-		snprintf (tmp, 500, "%d", (int) len);
-		strcats (res, tmp, cnt);
-		strcats (res, "", cnt);
-		int n=0;
-		while ( (n=read(file, res+cnt, RESBUFSIZE-cnt)) > 0 ) {
-			cnt += n;
+			size_t size = RESBUFSIZE;
+			char *php_result = (char *) malloc (size); //TODO handle error.
+			FILE *php_exec = popen(strcat(strcpy(malloc(strlen(req->request_uri)+16),
+							"php -f "), req->request_uri), "r"); //TODO handle error.
+			if (!php_exec) {
+				perror("popen");
+			}
+			//TODO use temporary file to buffer if result too large.
+			size_t n=0, old_n=0;
+			while ( (n+=fread(php_result+n, size-old_n, 1, php_exec)) > 0 ) {
+				if (n==size) {
+					size *= 2;
+					php_result = realloc (php_result, size); //TODO handle error.
+				}
+				old_n = n;
+			}
+			char slength[512]={0};
+			snprintf (slength, 500, "%d", (int) n);
+			strcats (res, slength, cnt);
+			strcats (res, "", cnt);
 			write (fd, res, cnt);
-			cnt=0;
+
+			php_result[n]=0;
+
+			write (fd, php_result, n);
+			free (php_result);
+			pclose (php_exec);
+		} else {
+			const char *mime = get_mime_from_ext(ext);
+			char *ctype = strcat (strcpy (malloc(128), "Content-Type: "), mime);
+
+			// TODO handle error.
+			strcats (res, "HTTP/1.1 200 OK", cnt); //FIXME
+			strcats (res, "Server: Hapache/0.0.1", cnt);
+			strcats (res, "Connection: close", cnt); /* Force close. */
+			strcats (res, ctype, cnt); //FIXME
+			free (ctype);
+			strcat (res, "Content-Length: "); cnt += strlen("Content-Length: ");
+			char tmp[512]={0};
+			snprintf (tmp, 500, "%d", (int) len);
+			strcats (res, tmp, cnt);
+			strcats (res, "", cnt);
+			int n=0;
+			while ( (n=read(file, res+cnt, RESBUFSIZE-cnt)) > 0 ) {
+				cnt += n;
+				write (fd, res, cnt);
+				cnt=0;
+			}
 		}
 		close (file);
 	} else {
